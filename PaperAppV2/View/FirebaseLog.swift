@@ -67,6 +67,11 @@ struct FirebaseLog: View {
                 .foregroundColor(.white)
                 .cornerRadius(10)
 
+                Button {
+//                    FirebaseLogGoogle(isLoggedIn: $isLoggedIn)
+                } label: {
+                    Text("GG")
+                }
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
@@ -76,7 +81,6 @@ struct FirebaseLog: View {
                 }
                 .padding(.top, 20)
                 
-                // هدایت به HomeView با NavigationLink جدید
                 NavigationLink(value: isLoggedIn, label: {
                     EmptyView()
                 })
@@ -143,3 +147,69 @@ func signUp(email: String, password: String, username: String, completion: @esca
 #Preview {
     FirebaseLog(isLoggedIn: .constant(false))
 }
+
+
+// Your existing imports remain the same
+import GoogleSignIn
+import GoogleSignInSwift
+import FirebaseCore
+
+struct FirebaseLogGoogle: View {
+    @Binding var isLoggedIn: Bool
+    
+    func signInWithGoogle() {
+        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let rootViewController = window.rootViewController else {
+            return
+        }
+        
+        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
+            if let error = error {
+                print(error.localizedDescription)
+                return
+            }
+            
+            guard let user = result?.user,
+                  let idToken = user.idToken?.tokenString else {
+                return
+            }
+            
+            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
+                                                           accessToken: user.accessToken.tokenString)
+            
+            Auth.auth().signIn(with: credential) { authResult, error in
+                if let error = error {
+                    print(error.localizedDescription)
+                    return
+                }
+                
+                // User successfully signed in
+                self.isLoggedIn = true
+            }
+        }
+    }
+    
+    var body: some View {
+        Button(action: signInWithGoogle) {
+            HStack {
+                Image(systemName: "g.circle.fill")
+                    .foregroundColor(.red)
+                Text("Sign in with Google")
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 2)
+        .padding(.top, 20)
+        
+        // The rest of your view content remains the same
+    }
+}
+
+// The rest of your code remains the same
