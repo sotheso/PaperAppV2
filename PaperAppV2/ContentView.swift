@@ -8,12 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            FirebaseLog(isLoggedIn: $isLoggedIn)
         }
         .padding()
     }
@@ -22,3 +21,4 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
