@@ -6,9 +6,15 @@
 //
 
 import SwiftUI
+import FirebaseAuth
+
 
 struct SettingView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
+    @AppStorage("isLoggedIn") private var isLoggedIn = false
+
+    @State private var showLogoutAlert = false
+
     
     var body: some View {
         NavigationView {
@@ -35,7 +41,7 @@ struct SettingView: View {
                 
                 Section {
                     Button(action: {
-                        // Add logout action here
+                        showLogoutAlert = true
                     }) {
                         Label("خروج از حساب کاربری", systemImage: "rectangle.portrait.and.arrow.right")
                             .foregroundColor(.red)
@@ -43,6 +49,20 @@ struct SettingView: View {
                 }
             }
             .navigationTitle("تنظیمات")
+            .alert("آیا مطمئن هستید؟", isPresented: $showLogoutAlert) {
+                            Button("خیر", role: .cancel) {}
+                            Button("بله", role: .destructive) {
+                                do {
+                                    try Auth.auth().signOut()
+                                    isLoggedIn = false
+                                } catch {
+                                    print("Error signing out: \(error.localizedDescription)")
+                                }
+                            }
+                        } message: {
+                            Text("شما در حال خروج از حساب کاربری خود هستید")
+                        }
+
         }
     }
 }

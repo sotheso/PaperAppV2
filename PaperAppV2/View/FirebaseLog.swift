@@ -52,6 +52,7 @@ struct FirebaseLog: View {
                             switch result {
                             case .success(let isVerified):
                                 if isVerified {
+                                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
                                     isLoggedIn = true // هدایت به HomeView
                                 } else {
                                     errorMessage = "Please verify your email before logging in."
