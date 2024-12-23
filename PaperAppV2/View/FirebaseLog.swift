@@ -18,7 +18,9 @@ struct FirebaseLog: View {
     @State private var isSignUp = false
     @State private var errorMessage = ""
     
-    // برای هدایت به HomeView
+    @Environment(\.colorScheme) private var colorScheme
+    
+    @StateObject private var viewModel = AuthenticationViewModel() 
 
     var body: some View {
         NavigationStack {
@@ -63,16 +65,38 @@ struct FirebaseLog: View {
                         }
                     }
                 }
-                .padding()
+                .padding(.vertical, 15)
+                .frame(maxWidth: .infinity)
+                .font(.system(size: 20, weight: .bold))
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(10)
 
-                Button {
-//                    FirebaseLogGoogle(isLoggedIn: $isLoggedIn)
-                } label: {
-                    Text("GG")
+                HStack {
+                    VStack { Divider () }
+                    Text ("or")
+                    VStack { Divider () }
                 }
+                
+                Button {
+                    Task {
+                        if await viewModel.signInWithGoogle() {
+                            isLoggedIn = true
+                        }
+                    }
+                } label: {
+                    Text("Sign in with Google")
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(alignment: .leading) {
+                            Image("google-logo")
+                                .frame(width: 160, alignment: .center)
+                        }
+                }
+                            .buttonStyle(.bordered)
+
+                
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .padding()
@@ -149,68 +173,3 @@ func signUp(email: String, password: String, username: String, completion: @esca
     FirebaseLog(isLoggedIn: .constant(false))
 }
 
-
-// Your existing imports remain the same
-import GoogleSignIn
-import GoogleSignInSwift
-import FirebaseCore
-
-struct FirebaseLogGoogle: View {
-    @Binding var isLoggedIn: Bool
-    
-    func signInWithGoogle() {
-        guard let clientID = FirebaseApp.app()?.options.clientID else { return }
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
-        
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let rootViewController = window.rootViewController else {
-            return
-        }
-        
-        GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController) { result, error in
-            if let error = error {
-                print(error.localizedDescription)
-                return
-            }
-            
-            guard let user = result?.user,
-                  let idToken = user.idToken?.tokenString else {
-                return
-            }
-            
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken,
-                                                           accessToken: user.accessToken.tokenString)
-            
-            Auth.auth().signIn(with: credential) { authResult, error in
-                if let error = error {
-                    print(error.localizedDescription)
-                    return
-                }
-                
-                // User successfully signed in
-                self.isLoggedIn = true
-            }
-        }
-    }
-    
-    var body: some View {
-        Button(action: signInWithGoogle) {
-            HStack {
-                Image(systemName: "g.circle.fill")
-                    .foregroundColor(.red)
-                Text("Sign in with Google")
-            }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(radius: 2)
-        .padding(.top, 20)
-        
-        // The rest of your view content remains the same
-    }
-}
-
-// The rest of your code remains the same
