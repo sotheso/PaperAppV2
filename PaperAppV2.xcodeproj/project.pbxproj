@@ -19,7 +19,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		9B9655AC2D19AEE300BAA961 /* Exceptions for "PaperAppV2" folder in "PaperAppV2" target */ = {
+		9B23A0A92D1AC0AA001DA4CC /* Exceptions for "PaperAppV2" folder in "PaperAppV2" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -32,7 +32,7 @@
 		9B355D7E2D184184006E2211 /* PaperAppV2 */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				9B9655AC2D19AEE300BAA961 /* Exceptions for "PaperAppV2" folder in "PaperAppV2" target */,
+				9B23A0A92D1AC0AA001DA4CC /* Exceptions for "PaperAppV2" folder in "PaperAppV2" target */,
 			);
 			path = PaperAppV2;
 			sourceTree = "<group>";

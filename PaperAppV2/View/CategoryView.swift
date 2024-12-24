@@ -21,7 +21,7 @@ struct CategoryView: View {
     @State private var startTopInsert: CGFloat = 0
     
     var body: some View {
-        NavigationStack{
+        NavigationView{
             ScrollView(.vertical){
                 VStack(spacing: 0){
                     CustomTabBar(activeTab: $activeTab)

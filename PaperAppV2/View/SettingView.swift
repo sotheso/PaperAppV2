@@ -7,7 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth
-
+import GoogleSignIn
 
 struct SettingView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
@@ -52,19 +52,26 @@ struct SettingView: View {
             .alert("آیا مطمئن هستید؟", isPresented: $showLogoutAlert) {
                             Button("خیر", role: .cancel) {}
                             Button("بله", role: .destructive) {
-                                do {
-                                    try Auth.auth().signOut()
-                                    isLoggedIn = false
-                                } catch {
-                                    print("Error signing out: \(error.localizedDescription)")
-                                }
+                                signOut()
                             }
-                        } message: {
-                            Text("شما در حال خروج از حساب کاربری خود هستید")
-                        }
-
+            } message: {
+                Text("شما در حال خروج از حساب کاربری خود هستید")
+            }
         }
     }
+    func signOut() {
+        // Sign out from Google
+        GIDSignIn.sharedInstance.signOut()
+        
+        // Sign out from Firebase
+        do {
+            try Auth.auth().signOut()
+            isLoggedIn = false
+        } catch {
+            print("Error signing out: \(error.localizedDescription)")
+        }
+    }
+    
 }
 
 #Preview {

@@ -27,7 +27,6 @@ struct AsliView: View {
                         Tab.init(value: .category){
                             CategoryView()
                                 .toolbarVisibility(.hidden, for: .tabBar)
-//                                .toolbarVisibility(.hidden, for: .navigationBar)
                         }
                         
                         Tab.init(value: .notification){

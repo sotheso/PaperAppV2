@@ -15,51 +15,65 @@ class AuthenticationViewModel: ObservableObject {
     // Your properties remain the same
     @Published var errorMessage = ""
     
+    @MainActor
     func signInWithGoogle() async -> Bool {
-        guard let clientID = FirebaseApp.app()?.options.clientID else {
-            fatalError("No client ID found in Firebase configuration")
-        }
-        let config = GIDConfiguration(clientID: clientID)
-        GIDSignIn.sharedInstance.configuration = config
+        // Reset any previous error
+        self.errorMessage = ""
         
-        guard let windowScene = await UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = await windowScene.windows.first,
-              let rootViewController = await window.rootViewController
-        else {
-            // Move to main thread for updating @Published property
-            await MainActor.run {
-                self.errorMessage = "There is no root view controller"
-            }
-            print("There is no root view controller")
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            self.errorMessage = "No client ID found in Firebase configuration"
+            return false
+        }
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            self.errorMessage = "No root view controller found"
             return false
         }
         
         do {
-            let userAuthentication = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
-            let user = userAuthentication.user
-            guard let idToken = user.idToken else {
-                throw AuthenticationError.tokenError(message: "ID token missing")
-            }
-            let accessToken = user.accessToken
-            let credential = GoogleAuthProvider.credential(withIDToken: idToken.tokenString, accessToken: accessToken.tokenString)
+            // Configure Google Sign In
+            let config = GIDConfiguration(clientID: clientID)
+            GIDSignIn.sharedInstance.configuration = config
             
-            let result = try await Auth.auth().signIn(with: credential)
-            let firebaseUser = result.user
-            print("User \(firebaseUser.uid) signed in with email \(firebaseUser.email ?? "unknown")")
-            return true
-        } catch {
-            // Move to main thread for updating @Published property
-            await MainActor.run {
-                self.errorMessage = error.localizedDescription
+            // Attempt to restore previous sign-in
+            if GIDSignIn.sharedInstance.hasPreviousSignIn() {
+                print("Attempting to restore previous sign-in")
+                _ = try await GIDSignIn.sharedInstance.restorePreviousSignIn()
             }
-            print(error.localizedDescription)
+            
+            // Perform sign in
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+            
+            guard let idToken = result.user.idToken?.tokenString else {
+                self.errorMessage = "Failed to get ID token"
+                return false
+            }
+            
+            let credential = GoogleAuthProvider.credential(
+                withIDToken: idToken,
+                accessToken: result.user.accessToken.tokenString
+            )
+            
+            // Sign in to Firebase
+            let authResult = try await Auth.auth().signIn(with: credential)
+            print("Successfully signed in with Google as \(authResult.user.email ?? "unknown")")
+            return true
+            
+        } catch {
+            self.errorMessage = error.localizedDescription
+            print("Detailed sign in error: \(error)")
+            
+            // Remove the AuthErrorCode.Code check
+            print("Error code: \((error as NSError).code)")
             return false
         }
     }
 }
 
-// Rest of the file remains the same
+// Error enum remains the same
 enum AuthenticationError: Error {
     case tokenError(message: String)
 }
 
+// End of file. No additional code.
