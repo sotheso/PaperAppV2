@@ -40,6 +40,8 @@ struct AsliView: View {
                         }
                     }
                     .ignoresSafeArea(.all)
+                    
+// For iOS low18
                 } else {
 //                    TabView(selection: $activeTab){
 //                        Text("home")
@@ -65,7 +67,7 @@ struct AsliView: View {
 //                            .tag(TabMod.setting)
                 }
             }
-            CustomTabBars(activeTab: $activeTab)
+            TabBarsMod(activeTab: $activeTab)
         }
     }
 }

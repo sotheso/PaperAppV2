@@ -44,7 +44,7 @@ struct PaperAppV2App: App {
                 if isLoggedIn {
                     AsliView()
                 } else {
-                    FirebaseLog(isLoggedIn: $isLoggedIn)
+                    LogView(isLoggedIn: $isLoggedIn)
                         .preferredColorScheme(isDarkMode ? .dark : .light)
                 }
             }

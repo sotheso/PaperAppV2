@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct CustomTabBars: View {
+struct TabBarsMod: View {
     var activeForgraound: Color = .white
     var activeBackground: Color = .blue
     

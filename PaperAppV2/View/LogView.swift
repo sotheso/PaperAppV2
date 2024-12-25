@@ -9,7 +9,7 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 
-struct FirebaseLog: View {
+struct LogView: View {
     @Binding var isLoggedIn: Bool
 
     @State private var email = ""
@@ -20,7 +20,7 @@ struct FirebaseLog: View {
     
     @Environment(\.colorScheme) private var colorScheme
     
-    @StateObject private var viewModel = AuthenticationViewModel() 
+    @StateObject private var viewModel = AuthenticationMod() 
 
     var body: some View {
         NavigationStack {
@@ -55,7 +55,7 @@ struct FirebaseLog: View {
                             case .success(let isVerified):
                                 if isVerified {
                                     UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                                    isLoggedIn = true // هدایت به HomeView
+                                    isLoggedIn = true
                                 } else {
                                     errorMessage = "Please verify your email before logging in."
                                 }
@@ -170,6 +170,6 @@ func signUp(email: String, password: String, username: String, completion: @esca
 }
 
 #Preview {
-    FirebaseLog(isLoggedIn: .constant(false))
+    LogView(isLoggedIn: .constant(false))
 }
 

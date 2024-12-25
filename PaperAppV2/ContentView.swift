@@ -12,7 +12,7 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            FirebaseLog(isLoggedIn: $isLoggedIn)
+            LogView(isLoggedIn: $isLoggedIn)
         }
         .padding()
     }

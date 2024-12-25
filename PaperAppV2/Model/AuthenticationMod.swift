@@ -11,8 +11,7 @@ import FirebaseCore
 import FirebaseAuth
 import GoogleSignIn
 
-class AuthenticationViewModel: ObservableObject {
-    // Your properties remain the same
+class AuthenticationMod: ObservableObject {
     @Published var errorMessage = ""
     
     @MainActor
@@ -75,5 +74,3 @@ class AuthenticationViewModel: ObservableObject {
 enum AuthenticationError: Error {
     case tokenError(message: String)
 }
-
-// End of file. No additional code.

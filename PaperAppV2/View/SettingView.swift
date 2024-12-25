@@ -59,6 +59,8 @@ struct SettingView: View {
             }
         }
     }
+    
+    
     func signOut() {
         // Sign out from Google
         GIDSignIn.sharedInstance.signOut()
