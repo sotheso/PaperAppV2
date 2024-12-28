@@ -6,46 +6,38 @@
 //
 
 // Your imports remain the same
+// Your imports remain the same
 import SwiftUI
 import Firebase
 import FirebaseCore
 import FirebaseAuth
+import FirebaseStorage // Add this import
 import GoogleSignIn
 
 @main
 struct PaperAppV2App: App {
-    // Your properties remain the same
+    // Rest of the code remains the same
     @AppStorage("isDarkMode") private var isDarkMode = false
     @AppStorage("isLoggedIn") private var isLoggedIn = false
     
     init() {
-        // Configure Firebase first, before any other operations
+        // Rest of the init code remains the same
         FirebaseApp.configure()
         
-        // Configure Google Sign In
         if let clientID = FirebaseApp.app()?.options.clientID {
             let config = GIDConfiguration(clientID: clientID)
             GIDSignIn.sharedInstance.configuration = config
-            
-            // Print debug information
-            print("=== Firebase Configuration ====")
-            print("Bundle ID: \(Bundle.main.bundleIdentifier ?? "Not found")")
-            print("Client ID: \(clientID)")
-            print("=============================")
-        } else {
-            print("❌ Failed to configure Google Sign In: No client ID found")
         }
     }
 
-    // Your scene remains the same
     var body: some Scene {
+        // Body code remains the same
         WindowGroup {
             NavigationStack {
                 if isLoggedIn {
                     AsliView()
                 } else {
                     LogView(isLoggedIn: $isLoggedIn)
-                        .preferredColorScheme(isDarkMode ? .dark : .light)
                 }
             }
         }
