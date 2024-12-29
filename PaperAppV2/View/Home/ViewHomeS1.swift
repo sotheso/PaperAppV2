@@ -6,126 +6,126 @@
 //
 
 import SwiftUI
+// Your imports remain the same
 
 struct ViewHomeS1<Content: View>: View {
+    // Properties remain the same
     @Binding var activeIndex: Int
-    
     @ViewBuilder var content: Content
-    
     @State private var scrollPosition: Int?
-    @State private var offsetBasedScreen: Bool = false
+    @State private var offsetBasedScreen: Int = 0
     @State private var isSettled: Bool = false
-    
     @State private var isScrolling: Bool = false
-    
-    // دست خر زیرش
     @GestureState private var isHoldingScreen: Bool = false
     @State private var timer = Timer.publish(every: autoSrollDuration, on: .main, in: .default).autoconnect()
-    
+
     var body: some View {
-        GeometryReader {
-            let size = $0.size
-            
+        GeometryReader { geometry in
+            let size = geometry.size
+
             Group(subviews: content) { collection in
-                ScrollView(.horizontal) {
-                    HStack(spacing: 0) {
-                        if let lasItem = collection.last {
-                            lasItem
-                                .frame(width: size.width, height: size.height)
-                                .id(-1)
-                        }
-                        
-                        ForEach(collection.indices, id: \.self) { index in
-                            collection[index]
-                                .frame(width: size.width, height: size.height)
-                                .id(index)
-                        }
-                        
-                        if let firstItem = collection.last {
-                            firstItem
-                                .frame(width: size.width, height: size.height)
-                                .id(collection.count)
-                            
-                        }
+                let contentView = HStack(spacing: 0) {
+                    // Main content
+                    ForEach(collection.indices, id: \ .self) { index in
+                        collection[index]
+                            .frame(width: size.width, height: size.height)
+                            .id(index)
                     }
-                    .scrollTargetLayout()
+
+                    // Additional dummy view for infinite scroll simulation
+                    if let firstItem = collection.first as? AnyView {
+                        firstItem
+                            .frame(width: size.width, height: size.height)
+                            .id(collection.count)
+                    }
+                }
+                .scrollTargetLayout()
+
+                ScrollView(.horizontal) {
+                    contentView
                 }
                 .scrollPosition(id: $scrollPosition)
                 .scrollTargetBehavior(.paging)
                 .scrollIndicators(.hidden)
-                
-                .onScrollPhaseChange{ oldPhase, newPhase in
-                    isScrolling = newPhase.isScrolling
-                    if  !isScrolling && scrollPosition == -1 {
-                        scrollPosition = collection.count - 1
-                    }
-                    
-                    if !isScrolling && scrollPosition == collection.count && !isHoldingScreen {
-                        scrollPosition = 0
-                    }
+                .onScrollPhaseChange { oldPhase, newPhase in
+                    handleScrollPhaseChange(newPhase, collectionCount: collection.count)
                 }
-                
-                .simultaneousGesture(DragGesture(minimumDistance: 0).updating($isHoldingScreen, body: {
-                    _ , state, _ in
+                .simultaneousGesture(DragGesture(minimumDistance: 0).updating($isHoldingScreen) { _, state, _ in
                     state = true
-                }))
-                
-                .onChange(of: isHoldingScreen, { oldValue , newValue in
-                    if newValue {
-                        timer.upstream.connect().cancel()
-                        
-                    } else {
-                        if isSettled && scrollPosition != offsetBasedScreen {
-                            scrollPosition = offsetBasedScreen
-                        }
-                        
-                        timer = Timer.publish(every: Self.autoSrollDuration, on: .main, in: .default).autoconnect()
-                    }
                 })
-                
-                .onReceive(timer) { _ in
-                    guard !isHoldingScreen && isScrolling else { return }
-                    
-                    let nextIndex = (scrollPosition ?? 0) + 1
-                    
-                    withAnimation(.snappy(duration: 0.5, extraBounce: 0)) {
-                        scrollPosition = (nextIndex == collection.count) ? 0 : nextIndex
-                        
-                    }
+                .onChange(of: isHoldingScreen) { newValue in
+                    handleHoldingScreenChange(newValue)
                 }
-                
-                .onChange(of: scrollPosition) { oldValue, newValue in
-                    if let newValue {
-                        if newValue == -1 {
-                            activeIndex = collection.count - 1
-                        } else if newValue == collection.count {
-                            activeIndex = 0
-                        } else {
-                            activeIndex = max(min(newValue, collection.count - 1), 0)
-                        }
-                    }
+                .onReceive(timer) { _ in
+                    handleTimerTick(collectionCount: collection.count)
+                }
+                .onChange(of: scrollPosition) { newValue in
+                    handleScrollPositionChange(newValue, collectionCount: collection.count)
                 }
                 .onScrollGeometryChange(for: CGFloat.self) {
                     $0.contentOffset.x
-                } action: { oldValue ,newValue in
-                    
-                    isSettled = size.width > 0 ? (Int(newValue) % Int(size.width) == 0) : false
-                    let index = size.width > 0 ? Int((newValue / size.width).rounded() - 1) : 0
-                    offsetBasedScreen = index
-                    
-                    if isSettled  && (scrollPosition != index || index == collection.count) && !isHoldingScreen {
-                        scrollPosition = index == collection.count ? -0 : index
-                    }
+                } action: { _, newValue in
+                    handleScrollGeometryChange(newValue, size: size, collectionCount: collection.count)
                 }
             }
-            .onAppear{ scrollPosition = 0 }
+            .onAppear { scrollPosition = 0 }
         }
     }
 
-    
-    
+    // The helper functions remain the same except for modified logic
+    private func handleScrollPhaseChange(_ newPhase: ScrollPhase, collectionCount: Int) {
+        isScrolling = newPhase.isScrolling
+        if !isScrolling && scrollPosition == -1 {
+            scrollPosition = 0  // Go back to the first item
+        }
+        if !isScrolling && scrollPosition == collectionCount && !isHoldingScreen {
+            scrollPosition = 0
+        }
+    }
+
+    private func handleHoldingScreenChange(_ newValue: Bool) {
+        if newValue {
+            timer.upstream.connect().cancel()
+        } else {
+            if isSettled && scrollPosition != offsetBasedScreen {
+                scrollPosition = offsetBasedScreen
+            }
+            timer = Timer.publish(every: Self.autoSrollDuration, on: .main, in: .default).autoconnect()
+        }
+    }
+
+    private func handleTimerTick(collectionCount: Int) {
+        guard !isHoldingScreen && !isScrolling else { return }
+        let nextIndex = (scrollPosition ?? 0) + 1
+        withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+            scrollPosition = (nextIndex == collectionCount) ? 0 : nextIndex
+        }
+    }
+
+    private func handleScrollPositionChange(_ newValue: Int?, collectionCount: Int) {
+        if let newValue {
+            if newValue == -1 {
+                activeIndex = collectionCount - 1
+            } else if newValue == collectionCount {
+                activeIndex = 0
+            } else {
+                activeIndex = max(min(newValue, collectionCount - 1), 0)
+            }
+        }
+    }
+
+    private func handleScrollGeometryChange(_ newValue: CGFloat, size: CGSize, collectionCount: Int) {
+        isSettled = size.width > 0 ? (Int(newValue) % Int(size.width) == 0) : false
+        let index = size.width > 0 ? Int((newValue / size.width).rounded() - 1) : 0
+        offsetBasedScreen = index
+
+        if isSettled && (scrollPosition != index || index == collectionCount) && !isScrolling && !isHoldingScreen {
+            scrollPosition = index == collectionCount ? 0 : index
+        }
+    }
+
     static var autoSrollDuration: CGFloat {
-        return 1
+        return 2
     }
 }
 

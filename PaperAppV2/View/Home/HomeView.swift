@@ -9,13 +9,19 @@ import SwiftUI
 
 struct HomeView: View {
     var body: some View {
-        NavigationStack {
-        BanereAval()
-            .background(Color.gray.opacity(0.2))
-            .navigationTitle("PaperApp")
-            
-        CardView()
-        Spacer()
+        ScrollView {
+            NavigationStack{
+                BanereAval()
+                    .background(Color.gray.opacity(0.2))
+                    .navigationTitle("PaperApp")
+                    .padding(30)
+                
+                CardView()
+                    .padding(30)
+                Spacer()
+                
+                ViewHomeS()
+            }
         }
     }
 }
