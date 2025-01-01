@@ -38,7 +38,13 @@ struct IntroView1: View {
             }
             .background{
                 Rectangle()
-                    .fill(.black.gradient)
+                    .fill(
+                        LinearGradient(
+                            colors: [.black, .blue],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
                     .ignoresSafeArea()
             }
             .navigationDestination(isPresented: $showingLoginView) {
@@ -137,9 +143,12 @@ struct IntroView1: View {
             Text(activePage == .page4 ? "Get Started" : "Continue")
                 .contentTransition(.identity)
                 .foregroundStyle(.black)
-                .padding(.vertical, 15)
-                .frame(maxWidth: activePage == .page4 ? 220 : 180)
-                .background(.white, in: .capsule)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal)
+                .padding(.vertical, 12)
+                .frame(maxWidth: 370)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .padding(.bottom, 15)
         .animation(.smooth(duration: 0.5, extraBounce: 0), value: activePage)

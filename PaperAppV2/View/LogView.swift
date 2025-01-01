@@ -20,64 +20,98 @@ struct LogView: View {
     
     @Environment(\.colorScheme) private var colorScheme
     
-    @StateObject private var viewModel = AuthenticationMod() 
+    @StateObject private var viewModel = AuthenticationMod()
 
     var body: some View {
         NavigationStack {
-            VStack {
-                if isSignUp {
-                    TextField("Username", text: $username)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                }
+            VStack(spacing: 25) {
+                Text(isSignUp ? "Create Account" : "Welcome Back")
+                    .font(.largeTitle.bold())
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top)
                 
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                Button(isSignUp ? "Sign Up" : "Login") {
+                VStack(spacing: 20) {
+                    if isSignUp {
+                        // Username field with icon
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.gray)
+                            TextField("Username", text: $username)
+                                .textContentType(.username)
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 12)
+                        .background(.white.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    
+                    // Email field with icon
+                    HStack(spacing: 12) {
+                        Image(systemName: "envelope.fill")
+                            .foregroundColor(.gray)
+                        TextField("Email", text: $email)
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    
+                    // Password field with icon
+                    HStack(spacing: 12) {
+                        Image(systemName: "lock.fill")
+                            .foregroundColor(.gray)
+                        SecureField("Password", text: $password)
+                            .textContentType(isSignUp ? .newPassword : .password)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
+                    .background(.white.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .foregroundColor(.white)
+                
+                // Login/Signup Button
+                Button(action: {
                     if isSignUp {
                         signUp(email: email, password: password, username: username) { result in
-                            switch result {
-                            case .success(let message):
-                                errorMessage = message
-                                isLoggedIn = false // جلوگیری از ورود
-                            case .failure(let error):
-                                errorMessage = error.localizedDescription
-                            }
+                            handleAuthResult(result)
                         }
                     } else {
                         login(email: email, password: password) { result in
-                            switch result {
-                            case .success(let isVerified):
-                                if isVerified {
-                                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
-                                    isLoggedIn = true
-                                } else {
-                                    errorMessage = "Please verify your email before logging in."
-                                }
-                            case .failure(let error):
-                                errorMessage = error.localizedDescription
-                            }
+                            handleAuthResult(result)
                         }
                     }
+                }) {
+                    Text(isSignUp ? "Sign Up" : "Login")
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
-                .padding(.vertical, 15)
-                .frame(maxWidth: .infinity)
-                .font(.system(size: 20, weight: .bold))
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-
-                HStack {
-                    VStack { Divider () }
-                    Text ("or")
-                    VStack { Divider () }
-                }
+                .padding(.top)
                 
+                // Divider
+                HStack {
+                    Rectangle()
+                        .fill(.white.opacity(0.5))
+                        .frame(height: 1)
+                    
+                    Text("OR")
+                        .foregroundColor(.white.opacity(0.5))
+                        .font(.caption)
+                    
+                    Rectangle()
+                        .fill(.white.opacity(0.5))
+                        .frame(height: 1)
+                }
+                .padding(.vertical)
+                
+                // Google Sign In Button
                 Button {
                     Task {
                         if await viewModel.signInWithGoogle() {
@@ -85,39 +119,85 @@ struct LogView: View {
                         }
                     }
                 } label: {
-                    Text("Sign in with Google")
-                        .foregroundColor(colorScheme == .dark ? .white : .black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(alignment: .leading) {
-                            Image("google-logo")
-                                .frame(width: 160, alignment: .center)
-                        }
+                    HStack(spacing: 12) {
+                        Image("google-logo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                        
+                        Text("Continue with Google")
+                            .font(.callout)
+                            .lineLimit(1)
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
-                            .buttonStyle(.bordered)
-
                 
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
-
-                Button(isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up") {
-                    isSignUp.toggle()
+                // Error Message
+                if !errorMessage.isEmpty {
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .padding(.top, 10)
                 }
-                .padding(.top, 20)
                 
-                NavigationLink(value: isLoggedIn, label: {
-                    EmptyView()
-                })
+                // Toggle Login/Signup
+                Button {
+                    withAnimation {
+                        isSignUp.toggle()
+                        errorMessage = ""
+                    }
+                } label: {
+                    Text(isSignUp ? "Already have an account? Login" : "Don't have an account? Sign Up")
+                        .foregroundColor(.white.opacity(0.7))
+                        .font(.callout)
+                }
+                .padding(.top)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.black, .blue],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .ignoresSafeArea()
             }
             .navigationDestination(isPresented: $isLoggedIn) {
                 AsliView()
                     .navigationBarBackButtonHidden()
             }
-            .padding()
+        }
+    }
+    
+    // Add helper function
+    private func handleAuthResult<T>(_ result: Result<T, Error>) {
+        switch result {
+        case .success(let value):
+            if let isVerified = value as? Bool {
+                if isVerified {
+                    UserDefaults.standard.set(true, forKey: "isLoggedIn")
+                    isLoggedIn = true
+                } else {
+                    errorMessage = "Please verify your email before logging in."
+                }
+            } else if let message = value as? String {
+                errorMessage = message
+                isLoggedIn = false
+            }
+        case .failure(let error):
+            errorMessage = error.localizedDescription
         }
     }
 }
+
 func login(email: String, password: String, completion: @escaping (Result<Bool, Error>) -> Void) {
     Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
         if let error = error {
@@ -172,4 +252,3 @@ func signUp(email: String, password: String, username: String, completion: @esca
 #Preview {
     LogView(isLoggedIn: .constant(false))
 }
-
