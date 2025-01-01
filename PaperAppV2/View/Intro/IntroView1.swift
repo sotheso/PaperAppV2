@@ -9,33 +9,41 @@ import SwiftUI
 
 struct IntroView1: View {
     
+    @State private var showingLoginView = false
     @State private var activePage: IntroModel = .page1
+    @Binding var isLoggedIn: Bool
+    
     var body: some View {
-        GeometryReader {
-            let size = $0.size
-            
-            
-            VStack {
-                Spacer(minLength: 0)
-                IntroSymbolView(symbol: activePage.rawValue, config: .init(font: .system(size: 150, weight: .bold), frame: .init(width: 250, height: 200), radio:30, forgroudColor: .white))
+        NavigationStack {
+            GeometryReader {
+                let size = $0.size
                 
-                TexContents(size: size)
                 
-                Spacer(minLength: 0)
-                
-                IndicatorView()
-                
-                ContinueButton()
+                VStack {
+                    Spacer(minLength: 0)
+                    IntroSymbolView(symbol: activePage.rawValue, config: .init(font: .system(size: 150, weight: .bold), frame: .init(width: 250, height: 200), radio:30, forgroudColor: .white))
+                    
+                    TexContents(size: size)
+                    
+                    Spacer(minLength: 0)
+                    
+                    IndicatorView()
+                    
+                    ContinueButton()
+                }
+                .frame(maxWidth: .infinity)
+                .overlay(alignment: .top) {
+                    HeaderView()
+                }
             }
-            .frame(maxWidth: .infinity)
-            .overlay(alignment: .top) {
-                HeaderView()
+            .background{
+                Rectangle()
+                    .fill(.black.gradient)
+                    .ignoresSafeArea()
             }
-        }
-        .background{
-            Rectangle()
-                .fill(.black.gradient)
-                .ignoresSafeArea()
+            .navigationDestination(isPresented: $showingLoginView) {
+                LogView(isLoggedIn: $isLoggedIn)
+            }
         }
     }
     
@@ -120,7 +128,11 @@ struct IntroView1: View {
     @ViewBuilder
     func ContinueButton() -> some View {
         Button {
-            activePage = activePage.nextPage
+            if activePage == .page4 {
+                showingLoginView = true
+            } else {
+                activePage = activePage.nextPage
+            }
         } label: {
             Text(activePage == .page4 ? "Get Started" : "Continue")
                 .contentTransition(.identity)
@@ -131,10 +143,9 @@ struct IntroView1: View {
         }
         .padding(.bottom, 15)
         .animation(.smooth(duration: 0.5, extraBounce: 0), value: activePage)
-        
     }
 }
 
 #Preview {
-    IntroView1()
+    IntroView1(isLoggedIn: .constant(false))
 }
