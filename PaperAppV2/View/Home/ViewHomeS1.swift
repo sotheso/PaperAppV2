@@ -6,10 +6,8 @@
 //
 
 import SwiftUI
-// Your imports remain the same
 
 struct ViewHomeS1<Content: View>: View {
-    // Properties remain the same
     @Binding var activeIndex: Int
     @ViewBuilder var content: Content
     @State private var scrollPosition: Int?
@@ -33,8 +31,8 @@ struct ViewHomeS1<Content: View>: View {
                     }
 
                     // Additional dummy view for infinite scroll simulation
-                    if let firstItem = collection.first as? AnyView {
-                        firstItem
+                    if let firstItem = collection.first{
+                        AnyView (firstItem)
                             .frame(width: size.width, height: size.height)
                             .id(collection.count)
                     }
@@ -53,14 +51,14 @@ struct ViewHomeS1<Content: View>: View {
                 .simultaneousGesture(DragGesture(minimumDistance: 0).updating($isHoldingScreen) { _, state, _ in
                     state = true
                 })
-                .onChange(of: isHoldingScreen) { newValue in
-                    handleHoldingScreenChange(newValue)
+                .onChange(of: isHoldingScreen) {
+                    handleHoldingScreenChange($1)
                 }
                 .onReceive(timer) { _ in
                     handleTimerTick(collectionCount: collection.count)
                 }
-                .onChange(of: scrollPosition) { newValue in
-                    handleScrollPositionChange(newValue, collectionCount: collection.count)
+                .onChange(of: scrollPosition) {
+                    handleScrollPositionChange($1 , collectionCount: collection.count)
                 }
                 .onScrollGeometryChange(for: CGFloat.self) {
                     $0.contentOffset.x
@@ -72,11 +70,10 @@ struct ViewHomeS1<Content: View>: View {
         }
     }
 
-    // The helper functions remain the same except for modified logic
     private func handleScrollPhaseChange(_ newPhase: ScrollPhase, collectionCount: Int) {
         isScrolling = newPhase.isScrolling
         if !isScrolling && scrollPosition == -1 {
-            scrollPosition = 0  // Go back to the first item
+            scrollPosition = 0
         }
         if !isScrolling && scrollPosition == collectionCount && !isHoldingScreen {
             scrollPosition = 0

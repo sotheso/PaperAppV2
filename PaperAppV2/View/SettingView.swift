@@ -12,9 +12,7 @@ import GoogleSignIn
 struct SettingView: View {
     @AppStorage("isDarkMode") private var isDarkMode = false
     @AppStorage("isLoggedIn") private var isLoggedIn = false
-
     @State private var showLogoutAlert = false
-
     
     var body: some View {
         NavigationView {
@@ -50,30 +48,40 @@ struct SettingView: View {
             }
             .navigationTitle("تنظیمات")
             .alert("آیا مطمئن هستید؟", isPresented: $showLogoutAlert) {
-                            Button("خیر", role: .cancel) {}
-                            Button("بله", role: .destructive) {
-                                signOut()
-                            }
+                Button("خیر", role: .cancel) {}
+                Button("بله", role: .destructive) {
+                    Task { // Wrap the signOut call in a Task
+                        await signOut()
+                    }
+                }
             } message: {
                 Text("شما در حال خروج از حساب کاربری خود هستید")
             }
         }
     }
     
-    
-    func signOut() {
-        // Sign out from Google
-        GIDSignIn.sharedInstance.signOut()
-        
-        // Sign out from Firebase
+    func signOut() async {
         do {
+            // Sign out from Firebase
             try Auth.auth().signOut()
-            isLoggedIn = false
+            
+            // Sign out from Google
+            GIDSignIn.sharedInstance.signOut()
+            
+            // Update login state on the main thread
+            await MainActor.run {
+              withAnimation {
+                isLoggedIn = false
+                 showLogoutAlert = false
+              }
+            }
         } catch {
             print("Error signing out: \(error.localizedDescription)")
+             await MainActor.run {
+                // Optionally handle sign out errors here with UI updates
+              }
         }
     }
-    
 }
 
 #Preview {
