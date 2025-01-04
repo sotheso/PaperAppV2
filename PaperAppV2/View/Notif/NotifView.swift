@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ViewHomeS2: View {
+struct NotifView: View {
     @State private var topInset: CGFloat = 0
     @State private var scrollOffsetY: CGFloat = 0
     @State private var scrollProgressX: CGFloat = 0
@@ -76,16 +76,16 @@ struct ViewHomeS2: View {
     
     @ViewBuilder
     func CarouselView() -> some View{
-        let spacing: CGFloat = 4
+        let spacing: CGFloat = 6
 
         ScrollView(.horizontal){
             LazyHStack(spacing: spacing) {
-                ForEach(ViewHomeS3) { model in
+                ForEach(imageNotif) { model in
                     Image(model.image)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .containerRelativeFrame(.horizontal)
-                        .frame(height: 300)
+                        .frame(height: 380)
                         .clipShape(.rect(cornerRadius: 10))
                         .shadow(color: .black.opacity(0.4), radius: 5, x:5, y: 5)
                 }
@@ -101,11 +101,11 @@ struct ViewHomeS2: View {
         
         .onScrollGeometryChange(for: CGFloat.self){
             let offsetX = $0.contentOffset.x + $0.contentInsets.leading
-            let width = $0.contentSize.width + spacing
+            let width = $0.containerSize.width + spacing
             
             return offsetX / width
         } action: { oldValue , newValue in
-            let maxValue = CGFloat(ViewHomeS3.count - 1)
+            let maxValue = CGFloat(imageNotif.count - 1)
             scrollProgressX = min(max(newValue, 0), maxValue)
         }
     }
@@ -116,8 +116,8 @@ struct ViewHomeS2: View {
             let size = $0.size
             
             ZStack{
-                ForEach(ViewHomeS3.reversed()) { model in
-                    let index = CGFloat(ViewHomeS3.firstIndex(where: { $0.id == model.id }) ?? 0) + 1
+                ForEach(imageNotif.reversed()) { model in
+                    let index = CGFloat(imageNotif.firstIndex(where: { $0.id == model.id }) ?? 0) + 1
                     
                     Image(model.image)
                         .resizable()

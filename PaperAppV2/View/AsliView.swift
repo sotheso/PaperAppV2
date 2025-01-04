@@ -30,8 +30,9 @@ struct AsliView: View {
                         }
                         
                         Tab.init(value: .notification){
-                            Text("notif")
+                            NotifView()
                                 .toolbarVisibility(.hidden, for: .tabBar)
+                                .preferredColorScheme(.dark)
                         }
                         
                         Tab.init(value: .setting){
