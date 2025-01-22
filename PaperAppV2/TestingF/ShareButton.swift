@@ -9,7 +9,21 @@ import SwiftUI
 
 struct ShareButton: View {
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Button (action: onTob){
+            Image(systemName: "square.and.arrow.up")
+        }
+    }
+    
+    func onTob() {
+        let url = URL(string: "https://t.me/sothesom")
+        let activityController = UIActivityViewController(activityItems: [url!], applicationActivities: nil)
+        
+//        UIApplication.shared.windows.first?.rootViewController!.present(activityController, animated: true, completion: nil)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootViewController = window.rootViewController {
+            rootViewController.present(activityController, animated: true)
+        }
     }
 }
 
