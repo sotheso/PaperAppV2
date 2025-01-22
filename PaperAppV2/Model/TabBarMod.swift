@@ -99,7 +99,7 @@ struct TabBarsMod: View {
         .padding(.bottom, 5)
         .animation(.smooth(duration: 0.3, extraBounce: 0), value: activeTab)
         
-    }
+    };
 }
 
 #Preview {
