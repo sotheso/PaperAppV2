@@ -14,7 +14,7 @@ struct SettingView: View {
     @AppStorage("isLoggedIn") private var isLoggedIn = false
     @State private var showLogoutAlert = false
     // اضافه کردن متغیر برای نمایش آلرت تماس با ما
-    @State private var showContactAlert = false
+    @State private var showActionSheet = false
     
     var body: some View {
         NavigationView {
@@ -29,7 +29,7 @@ struct SettingView: View {
                 
                 Section {
                     Button(action: {
-                        showContactAlert = true
+                        showActionSheet = true
                     }) {
                         Label("تماس با ما", systemImage: "paperplane.circle.fill")
                     }
@@ -62,27 +62,53 @@ struct SettingView: View {
             } message: {
                 Text("شما در حال خروج از حساب کاربری خود هستید")
             }
+            
+            .actionSheet(isPresented: $showActionSheet, content: {
+                ActionSheet(title: Text("شبکه‌های اجتماعی"), message: Text(" saf dfa"), buttons: [
+                    .default(Text("اینستاگرام"), action: {
+                        if let url = URL(string: "https://www.instagram.com/sothesom"){
+                            UIApplication.shared.open(url)
+                        }
+                    }),
+                    .default(Text("تگرام"), action: {
+                        if let url = URL(string: "https://t.me/sothesom"){
+                            UIApplication.shared.open(url)
+                        }
+                    }),
+                    .default(Text("ایتا"), action: {
+                        if let url = URL(string: "https://t.me/sothesom"){
+                            UIApplication.shared.open(url)
+                        }
+                    }),
+                    .default(Text("ایمیل"), action: {
+                        if let url = URL(string: "sothesom@gmail.com"){
+                            UIApplication.shared.open(url)
+                        }
+                    }),
+                    .cancel()
+                ])
+            })
             // اضافه کردن آلرت جدید برای تماس با ما
-            .alert("انتخاب نحوه ارتباط", isPresented: $showContactAlert) {
-                Button("تلگرام") {
-                    if let url = URL(string: "https://t.me/sothesom") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                Button("اینستاگرام") {
-                    if let url = URL(string: "https://www.instagram.com/sothesom") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                Button("تماس تلفنی") {
-                    if let url = URL(string: "tel:+989123456789"), UIApplication.shared.canOpenURL(url) {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                Button("لغو", role: .cancel) {}
-            } message: {
-                Text("لطفاً روش ارتباطی مورد نظر خود را انتخاب کنید")
-            }
+//            .alert("انتخاب نحوه ارتباط", isPresented: $showContactAlert) {
+//                Button("تلگرام") {
+//                    if let url = URL(string: "https://t.me/sothesom") {
+//                        UIApplication.shared.open(url)
+//                    }
+//                }
+//                Button("اینستاگرام") {
+//                    if let url = URL(string: "https://www.instagram.com/sothesom") {
+//                        UIApplication.shared.open(url)
+//                    }
+//                }
+//                Button("تماس تلفنی") {
+//                    if let url = URL(string: "tel:+989123456789"), UIApplication.shared.canOpenURL(url) {
+//                        UIApplication.shared.open(url)
+//                    }
+//                }
+//                Button("لغو", role: .cancel) {}
+//            } message: {
+//                Text("لطفاً روش ارتباطی مورد نظر خود را انتخاب کنید")
+//            }
         }
     }
     
