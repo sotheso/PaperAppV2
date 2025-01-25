@@ -32,5 +32,5 @@ struct courseTestView: View {
 
 
 #Preview {
-    HomeTestView()
+    courseTestView()
 }

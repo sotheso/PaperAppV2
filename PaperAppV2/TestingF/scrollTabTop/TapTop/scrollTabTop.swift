@@ -47,7 +47,7 @@ struct scrollTabTop: View {
                 .tag(1)
                 
                 NavigationView {
-                    HomeTestView()
+                    courseTestView()
                         .onChange(of: tappedTwice, perform: { tapped in
                             if tapped {
                                 withAnimation {
