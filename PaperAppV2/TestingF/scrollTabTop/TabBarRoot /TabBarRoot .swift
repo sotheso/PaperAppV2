@@ -46,7 +46,7 @@ struct TabBarRoot_: View {
                     .id(course)
                     .onChange(of: swiched, perform: { tapped in
                         guard swiched else { return }
-                        home = UUID()
+                        course = UUID()
                         swiched = false
                     })
             }
